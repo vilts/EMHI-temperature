@@ -1,13 +1,13 @@
 #!/usr/bin/python                                                                                                                                                                                                                                     
 # -*- coding: utf-8                                                                                                                                                                                                                                 
-import httplib
-import re
+import httplib, re, sqlite3, sys
 from time import gmtime, strftime
-import sqlite3
+
+if sys.argv[1] == 'init':
+    print "Init indeed"
+    sys.exit()
 
 filepath = '/home/vilts/devel/EMHI-temperature/'
-logfile_name = 'emhi_temp.log'
-tempfile_name = 'emhi_temp.txt'
 dbname = 'emhi.db'
 
 dbconn = sqlite3.connect(filepath + dbname)
@@ -36,23 +36,11 @@ weather_data = resp.read()
 cur = dbconn.cursor()
 cur.execute("SELECT * FROM cities");
 for row in cur:
+    current_time = strftime("%d/%m/%Y %H:%M:%S", gmtime())
     pattern = re.compile(row["regexp"])
     city_obj = re.search(pattern, weather_data)
     city_temp = float(city_obj.group(1))
-    print u"[{0}] {1}".format(row["name"], city_temp)
-
-tallinn_obj = re.search( r'<div style="position: absolute; left: 247px; top: 82px; width:70px; height:13px; color:#993300;" class="kaarditekst">(-?\d+\.?\d+)</div>', weather_data)
-tallinn_temp = float(tallinn_obj.group(1))
-
-tyri_obj = re.search( r'<div style="position: absolute; left: 322px; top: 187px; width:70px; height:13px; color:#993300;" class="kaarditekst">(-?\d+\.?\d+)</div>', weather_data)
-tyri_temp = float(tyri_obj.group(1))
-
-if tallinn_obj and tyri_obj:
-    current_time = strftime("%d/%m/%Y %H:%M:%S", gmtime())
-    print "[{0}]: {1}".format(current_time, tallinn_temp)
-    print "[{0}]: {1}".format(current_time, tyri_temp)
-else:
-    print "Didn't find temperature in web page."
+    print u"[{0}] ({1}) {2} °C".format(current_time, row["name"], city_temp)
 
 # old_temp = last_db_temp()
 
