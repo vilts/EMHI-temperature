@@ -3,10 +3,6 @@
 import httplib, re, sqlite3, sys
 from time import gmtime, strftime
 
-if sys.argv[1] == 'init':
-    print "Init indeed"
-    sys.exit()
-
 filepath = '/home/vilts/devel/EMHI-temperature/'
 dbname = 'emhi.db'
 
