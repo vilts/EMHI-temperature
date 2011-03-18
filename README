@@ -1,0 +1,3 @@
+EMHI temperature scraper
+
+Download hourly temperature info from emhi.ee and store it to SQLite.
