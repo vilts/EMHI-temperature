@@ -1,3 +1,5 @@
 EMHI temperature scraper
 
 Download hourly temperature info from emhi.ee and store it to SQLite.
+
+Currently gets only Tallinn temp. This can be run from crontab hourly at minute 6 or 7, looks like EMHI updates their data at minute 5.
