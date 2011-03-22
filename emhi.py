@@ -1,5 +1,5 @@
-#!/usr/bin/python                                                                                                                                                                                                                                     
-# -*- coding: utf-8                                                                                                                                                                                                                                 
+#!/usr/bin/python                                                                                                                                                                                                                        # -*- coding: utf-8                                                                                                                                                                                                                      
+
 import httplib, re, sqlite3, sys, getopt
 from time import gmtime, strftime
 
@@ -8,16 +8,21 @@ dbname = 'emhi.db'
 
 dbconn = sqlite3.connect(filepath + dbname)
 dbconn.row_factory = sqlite3.Row
-init_db = 0
 
 def main():
+    init_db = 0
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "ho:v", ["help", "output="])
+        opts, args = getopt.getopt(sys.argv[1:], "ih", ["init", "help"])
     except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
+
+    for o, a in opts:
+        if o in ("-i", "--init"):
+            init_db = 1
+        elif o in ("-h", "--help"):
+            usage()
+            sys.exit(2)
 
     conn = httplib.HTTPConnection('www.emhi.ee')
     conn.request("GET", "/?ide=21")
@@ -37,17 +42,13 @@ def main():
             insert_db_temp(city["id"], city_temp)
         elif last_db_temp(city["id"]) != city_temp:
             insert_db_temp(city["id"], city_temp)
-
-# old_temp = last_db_temp()
-            
-#if old_temp != degC:
-#    print "Inserting new temp to DB: " + str(degC)
-#    insert_db_temp(degC)
-#else:
-#    print "Old temp matches current: " + str(old_temp) + " = " + str(degC)
-
     dbconn.close()
 
+def usage():
+    print '''Usage: 
+./emhi.py
+./emhi.py -i [--init]   : Initialize DB with first values
+./emhi.pu -h [--help]   : Display this help message'''
 
 def last_db_temp(city_id):
     cur = dbconn.cursor()
