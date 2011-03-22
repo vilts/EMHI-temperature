@@ -34,8 +34,7 @@ def main():
     cur.execute("SELECT * FROM cities");
     for city in cur:
         current_time = strftime("%d/%m/%Y %H:%M:%S", gmtime())
-        pattern = re.compile(city["regexp"])
-        city_obj = re.search(pattern, weather_data)
+        city_obj = re.search(re.compile(city["regexp"]), weather_data)
         city_temp = float(city_obj.group(1))
         print u"[{0}] ({1}) {2} °C".format(current_time, city["name"], city_temp)
         if init_db:
