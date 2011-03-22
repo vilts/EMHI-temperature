@@ -35,6 +35,8 @@ def main():
         print u"[{0}] ({1}) {2} °C".format(current_time, city["name"], city_temp)
         if init_db:
             insert_db_temp(city["id"], city_temp)
+        elif last_db_temp(city["id"]) != city_temp:
+            insert_db_temp(city["id"], city_temp)
 
 # old_temp = last_db_temp()
             
@@ -44,12 +46,13 @@ def main():
 #else:
 #    print "Old temp matches current: " + str(old_temp) + " = " + str(degC)
 
-dbconn.close()
+    dbconn.close()
 
 
-def last_db_temp():
+def last_db_temp(city_id):
     cur = dbconn.cursor()
-    cur.execute('''SELECT temperature FROM emhi ORDER BY id DESC LIMIT 1''')
+    query = "SELECT temperature FROM emhi WHERE city_id = " + str(city_id) + " ORDER BY id DESC LIMIT 1"
+    cur.execute(query)
     row = cur.fetchone()
     cur.close()
     return row[0]
