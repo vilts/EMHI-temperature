@@ -12,10 +12,11 @@ dbname = 'emhi.db'
 
 dbconn = sqlite3.connect(ROOT + dbname)
 dbconn.row_factory = sqlite3.Row
+print_text = 0
 
 def main():
+    global print_text
     init_db = 0
-    print_text = 0
     try:
         opts, args = getopt.getopt(sys.argv[1:], "ihd", ["init", "help", "display"])
     except getopt.GetoptError, err:
