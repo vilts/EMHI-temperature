@@ -1,12 +1,16 @@
-#!/usr/bin/python                                                                                                                                                                                                                        # -*- coding: utf-8                                                                                                                                                                                                                      
+#!/usr/bin/python
+# -*- coding: utf-8                                                                                                                                                                                                                      
 
-import httplib, re, sqlite3, sys, getopt
+import httplib, re, sqlite3, sys, getopt, os
 from time import gmtime, strftime
 
-filepath = '/home/vilts/devel/EMHI-temperature/'
+from pygooglechart import SimpleLineChart
+from pygooglechart import Axis
+
+ROOT = os.path.dirname(os.path.abspath(__file__)) + "/"
 dbname = 'emhi.db'
 
-dbconn = sqlite3.connect(filepath + dbname)
+dbconn = sqlite3.connect(ROOT + dbname)
 dbconn.row_factory = sqlite3.Row
 
 def main():
@@ -35,12 +39,13 @@ def main():
     for city in cur:
         current_time = strftime("%d/%m/%Y %H:%M:%S", gmtime())
         city_obj = re.search(re.compile(city["regexp"]), weather_data)
-        city_temp = float(city_obj.group(1))
-        print u"[{0}] ({1}) {2} °C".format(current_time, city["name"], city_temp)
-        if init_db:
-            insert_db_temp(city["id"], city_temp)
-        elif last_db_temp(city["id"]) != city_temp:
-            insert_db_temp(city["id"], city_temp)
+        if city_obj:
+            city_temp = float(city_obj.group(1))
+            print u"[{0}] ({1}) {2} °C".format(current_time, city["name"], city_temp)
+            if init_db:
+                insert_db_temp(city["id"], city_temp)
+            elif last_db_temp(city["id"]) != city_temp:
+                insert_db_temp(city["id"], city_temp)
     dbconn.close()
 
 def usage():
@@ -64,5 +69,17 @@ def insert_db_temp(city_id, degC):
     dbconn.commit()
     cur.close()
 
+def simple_random():
+    chart = SimpleLineChart(300, 100, y_range=(0, 100))
+    max_y = 100
+    list_data = [10, 90, 80, 10, 10, 20, 30, 20, 15, 45, 56, 42, 92]
+    chart.add_data(list_data)
+    chart.add_data(reversed(list_data))
+    chart.set_axis_labels(Axis.LEFT, ['', max_y / 2, max_y])
+    chart.set_axis_labels(Axis.BOTTOM, ['Sep', 'Oct', 'Nov', 'Dec'])
+    chart.download('line-simple-random.png')
+
+
 if __name__ == "__main__":
     main()
+    # simple_random()
