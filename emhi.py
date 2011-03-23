@@ -15,8 +15,9 @@ dbconn.row_factory = sqlite3.Row
 
 def main():
     init_db = 0
+    print_text = 0
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "ih", ["init", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "ihd", ["init", "help", "display"])
     except getopt.GetoptError, err:
         usage()
         sys.exit(2)
@@ -27,6 +28,8 @@ def main():
         elif o in ("-h", "--help"):
             usage()
             sys.exit(2)
+        elif o in ("-d", "--display"):
+            print_text = 1
 
     conn = httplib.HTTPConnection('www.emhi.ee')
     conn.request("GET", "/?ide=21")
@@ -41,7 +44,8 @@ def main():
         city_obj = re.search(re.compile(city["regexp"]), weather_data)
         if city_obj:
             city_temp = float(city_obj.group(1))
-            print u"[{0}] ({1}) {2} °C".format(current_time, city["name"], city_temp)
+            if print_text:
+                print u"[{0}] ({1}) {2} °C".format(current_time, city["name"], city_temp)
             if init_db:
                 insert_db_temp(city["id"], city_temp)
             elif last_db_temp(city["id"]) != city_temp:
@@ -51,8 +55,9 @@ def main():
 def usage():
     print '''Usage: 
 ./emhi.py
-./emhi.py -i [--init]   : Initialize DB with first values
-./emhi.pu -h [--help]   : Display this help message'''
+./emhi.py -i [--init]    : Initialize DB with first values
+./emhi.py -h [--help]    : Display this help message
+./emhi.py -d [--display] : Display temperatures and other info'''
 
 def last_db_temp(city_id):
     cur = dbconn.cursor()
@@ -64,7 +69,8 @@ def last_db_temp(city_id):
 
 def insert_db_temp(city_id, degC):
     cur = dbconn.cursor()
-    print "Inserting to DB"
+    if print_text:
+        print "Inserting to DB"
     cur.execute("INSERT INTO emhi (city_id, temperature, timestamp) VALUES(" + str(city_id) + ", " + str(degC) + ", datetime('now'))")
     dbconn.commit()
     cur.close()
